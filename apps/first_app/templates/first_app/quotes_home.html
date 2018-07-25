@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quote Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        button {
+            margin: 10px 10px;
+        }
+        .addquote {
+            color: #28a745;
+        }
+        .quotestitle {
+            color: #007bff;
+        }
+        .rederrors {
+            color: red;
+        }
+        .delete {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-default">
+          <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+              <ul class="nav navbar-nav navbar-left">
+                <li><a href="">Hello, {{request.session.first_name}}!</a></li>
+              </ul>
+              <ul class="nav navbar-nav navbar-right">
+                <li><a href="/edit_account">Edit My Account</a></li>
+                <li><a href="logout">Logout</a></li>
+              </ul>
+            </div>
+          </div>
+        </nav>        
+        <div class="addquotesection">
+            <h1 class="addquote">Add Quote!</h1>
+            {% if messages %}
+                {% for message in messages %}
+                    {% if 'quote_errors' in message.extra_tags %}
+                        <p class="rederrors"> * {{ message }} * </p>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            <div class="quotes">
+                <form action="add_quote" method="POST">
+                {% csrf_token %}
+                    <p>Author:</p> 
+                    <input type="text" name="author"><br>
+                    <p>Quote:</p>
+                    <input class="addquotebox" type="text" name="quote"><br>
+                    <button name="register" type="submit" class="btn btn-success">Submit Quote</button>
+                </form>
+            </div>
+        </div>
+        <div class="quotesection">
+            <h1 class="quotestitle">Quotes</h1>
+            {% for quote in quotes %}
+            <div class="jumbotron">
+                <p> Quote: "{{ quote.quote }}"</p>
+                <p> Author: {{ quote.author }}</p>
+                <p>Posted By: <a href="/{{quote.posted_by.id}}/show_user">{{ quote.posted_by.first_name}} {{ quote.posted_by.last_name}}</a></p>
+                {% if request.session.id == quote.posted_by.id %}
+                <form action="destroy" method="POST">   
+                {% csrf_token %}
+                    <p><a class="delete" href="/{{quote.id}}/destroy">*DELETE MY QUOTE*</a></p>
+                </form> 
+                {% endif %}
+                <p><small class="text-muted">{{quote.likes.count}} People Like This Quote</small></p>
+                <a href="/{{quote.id}}/create_like"><button class="btn btn-danger btn-sm float-right">Like</button></a>
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if quote.quote in message.extra_tags %}
+                            <p class="rederrors"> * {{ message }} * </p>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>  
+</body>
+</html>
+
